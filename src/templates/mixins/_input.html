@@ -1,0 +1,46 @@
+{% macro input(name, mod, type = 'text', placeholder, value, options, fieldClass, fieldAttributes, attributes, label, isInline) %}
+<!-- begin {{ name }} -->
+{% if name === 'checkbox' or name === 'radio' %}
+<label class="{{ name }}{% if mod %} {{mod}}{% endif %}" {% for attr, attr_value in attributes %} {{ attr }}="{{ attr_value }}" {% endfor %}>
+{% elseif isInline %}
+<span class="{{ name }}{% if mod %} {{mod}}{% endif %}" {% for attr, attr_value in attributes %} {{ attr }}="{{ attr_value }}" {% endfor %}>
+{% else %}
+<div class="{{ name }}{% if mod %} {{mod}}{% endif %}" {% for attr, attr_value in attributes %} {{ attr }}="{{ attr_value }}" {% endfor %}>
+{% endif %}
+
+  {% if label.first and label.span %}
+  <span>{{ label.first | safe }}</span>
+  {% elseif label.first %}
+  <label>{{ label.first | safe }}</label>
+  {% endif %}
+
+  {% if name === 'input' or name === 'radio' or name === 'checkbox' %}
+  <input {% if fieldClass %}class="{{ fieldClass }}"{% endif %} type="{{ type }}" {% if placeholder %}placeholder="{{ placeholder }}"{% endif %} {% if value %}value="{{value}}"{% endif %} {% for attr, attr_value in fieldAttributes %} {{ attr }}="{{ attr_value }}" {% endfor %}>
+
+  {% elseif name === 'select' %}
+
+  <select {% if fieldClass %}class="{{ fieldClass }}"{% endif %} {% for attr, attr_value in fieldAttributes %} {{ attr }}="{{ attr_value }}" {% endfor %}>
+    {% for i in options %}
+    <option value="{{ i.value }}" {% for attr, attr_value in i.attributes %} {{ attr }}="{{ attr_value }}" {% endfor %}>{{ i.option }}</option>
+    {% endfor %}
+  </select>
+
+  {% elseif name === 'textarea' %}
+  <textarea {% if fieldClass %}class="{{ fieldClass }}"{% endif %} {% if placeholder %}placeholder="{{ placeholder }}"{% endif %} {% if value %}value="{{value}}"{% endif %} {% for attr, attr_value in fieldAttributes %} {{ attr }}="{{ attr_value }}" {% endfor %}></textarea>
+  {% endif %}
+
+  {% if label.last and label.span %}
+  <span>{{ label.last | safe }}</span>
+  {% elseif label.last %}
+  <label>{{ label.last | safe }}</label>
+  {% endif %}
+
+{% if name === 'checkbox' or name === 'radio' %}
+</label>
+{% elseif isInline %}
+</span>
+{% else %}
+</div>
+{% endif %}
+<!-- end {{ name }} -->
+{% endmacro %}

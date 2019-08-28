@@ -1,0 +1,16 @@
+<!-- begin slider -->
+<div class="slider pixi-slider-container js-slider">
+  <div class="pixi-slider-wrap">
+    {% for i in range(0, 5) %}
+    <div class="pixi-slider-slide" data-src="./img/{{ i + 1 }}.jpg">
+      <div class="slider__title">hello from slide {{ i + 1 }}</div>
+    </div>
+    {% endfor %}  
+  </div>
+  <div class="pixi-slider-controls">
+    <button class="arrow js-prev">Prev</button>
+    <button class="arrow js-next">Next</button>
+  </div>
+  <div class="pixi-slider-nav js-slider-nav"></div>
+</div>
+<!-- end slider -->

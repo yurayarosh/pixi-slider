@@ -1,0 +1,72 @@
+body
+  background: $white
+  line-height: 1.4
+  font-size: $fz
+  min-width: 320px
+  font-family: 'proximanova', Arial, sans-serif
+  color: $c-text
+  +no-scroll
+
+.icon
+  display: inline-block
+  fill: currentColor
+  font-size: inherit
+
+.lazy
+  &.is-loaded:not(.no-animation)
+    animation: fadeIn 1s
+
+.slider
+  width: 620px
+  height: 380px
+  margin-bottom: 200px
+  +r(780)
+    width: 320px
+    height: 240px
+  &__title
+    // transform: translate(0, 30px)
+    margin-top: 0.15em
+    opacity: 0
+    +tr(opacity .3s, transform .3s)
+
+.arrow
+  color: #000000
+  font-size: 16px
+  text-decoration: none
+  &:hover
+    text-decoration: underline
+
+.pixi-slider-wrap
+  +flex
+  overflow: hidden
+
+.pixi-slider-slide
+  flex: 0 0 100%
+  position: relative
+  opacity: 0
+  visibility: hidden
+  +flex(center, center)
+  color: #ffffff
+  font-size: 3em
+  text-transform: uppercase
+  +tr(opacity .3s, visibility .3s)
+  &.is-active
+    opacity: 1
+    visibility: visible
+    .slider
+      &__title
+        opacity: 1
+        transform: translate(0, 0)
+
+
+.pixi-slider-nav
+  margin-top: 20px
+  margin-bottom: 20px
+  li
+    display: inline-block
+    margin-left: 5px
+    margin-right: 5px
+  button
+    display: inline-block
+    padding: 10px
+    
