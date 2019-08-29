@@ -37,6 +37,7 @@ export default class PixiSlider {
       height: this.container.offsetHeight,
     };
 
+    this.scroll = props.scroll;
     this.canvas = null;
     this.slides = null;
     this.active = 0;
@@ -145,9 +146,39 @@ export default class PixiSlider {
 
     if (this.displacement !== undefined) tl.add(this._animate());
 
-    tl
-      .fromTo(slides[this.active].position, this.speed, { x: 0 }, { x: offset, ease: Power2.easeInOut }, `-=${this.speed}`)
-      .fromTo(slides[newIndex].position, this.speed, { x: -offset }, { x: 0, ease: Power2.easeInOut }, `-=${this.speed}`);
+    if (this.scroll) {
+      tl
+        .fromTo(
+          slides[this.active].position,
+          this.speed,
+          { x: 0 },
+          { x: offset, ease: Power2.easeInOut },
+          `-=${this.speed}`,
+        )
+        .fromTo(
+          slides[newIndex].position,
+          this.speed,
+          { x: -offset },
+          { x: 0, ease: Power2.easeInOut },
+          `-=${this.speed}`,
+        );
+    } else {
+      tl
+        .fromTo(
+          slides[this.active],
+          this.speed,
+          { alpha: 1 },
+          { alpha: 0, ease: Power2.easeInOut },
+          `-=${this.speed}`,
+        )
+        .fromTo(
+          slides[newIndex],
+          this.speed,
+          { alpha: 0 },
+          { alpha: 1, ease: Power2.easeInOut },
+          `-=${this.speed}`,
+        );
+    }
   }
 
   _renderSlide(image, index) {
@@ -166,10 +197,9 @@ export default class PixiSlider {
     slide.addChild(mask);
     slide.mask = mask;
 
-    if (index !== 0) {
-      // slide.alpha = 0;
-      slide.position.x = -this.size.width;
-    }
+    if (this.scroll) {
+      if (index !== 0) slide.position.x = -this.size.width;
+    } else if (index !== 0) slide.alpha = 0;
 
     return slide;
   }
@@ -276,6 +306,7 @@ sliders.forEach((slider) => {
   const mySlider = new PixiSlider({
     container: slider,
     clearWrap: false,
+    scroll: true,
     arrows: {
       prev,
       next,
