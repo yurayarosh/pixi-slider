@@ -3,30 +3,30 @@
 import * as PIXI from 'pixi.js';
 import { TimelineLite, Power2 } from 'gsap';
 import { debounce } from 'throttle-debounce';
+// import * as dat from 'dat.gui';
 import _clearWrapper from './_clearWrapper';
 import _createNav from './_createNav';
 import _setHTMLSlides from './_setHTMLSlides';
 import _handleNav from './_handleNav';
-import _initListeners from './_initListeners';
+// import _initListeners from './_initListeners';
 import _loadPictures from './_loadPictures';
 import move from './_move';
 import _addStage from './_addStage';
-import returnConstants from './_returnConstants';
-import coverSprite from './coverSprite';
+import constants from './_returnConstants';
 import createMask from './createMask';
 
-export default class PixiSlider {
+
+class PixiSlider {
   constructor(props) {
-    this.constants = returnConstants();
+    this.constants = constants;
     this.container = props.container;
-    this.wrapper = this.container.querySelector(`.${this.constants.wrap}`);
     this.props = props;
     this.controls = props.arrows;
     this.nav = props.nav;
     this.speed = props.speed * 0.4;
     this.displacement = props.displacement;
     this.displacement.speed = props.speed * 0.6;
-    this.HTMLslides = [...this.wrapper.children];
+    this.HTMLslides = [...this.container.children];
     this.slidesData = {
       images: this.HTMLslides.map((item) => item.getAttribute('data-src')),
       titles: this.HTMLslides.map((item) => item.querySelector('.slider__title')),
@@ -91,22 +91,15 @@ export default class PixiSlider {
         },
         0,
       )
-      .to(
-        this.DisplacementFilter.scale,
-        this.speed,
-        {
-          x: 0,
-          y: 0,
-          ease: Power2.easeInOut,
-        },
-      )
-      .set(
-        this.DisplacementSprite.position,
-        {
-          x: 0,
-          y: 0,
-        },
-      );
+      .to(this.DisplacementFilter.scale, this.speed, {
+        x: 0,
+        y: 0,
+        ease: Power2.easeInOut,
+      })
+      .set(this.DisplacementSprite.position, {
+        x: 0,
+        y: 0,
+      });
     return tl;
   }
 
@@ -117,7 +110,9 @@ export default class PixiSlider {
     this.DisplacementSprite = new PIXI.Sprite.from(this.displacement.img);
     this.DisplacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
 
-    this.DisplacementFilter = new PIXI.filters.DisplacementFilter(this.DisplacementSprite);
+    this.DisplacementFilter = new PIXI.filters.DisplacementFilter(
+      this.DisplacementSprite,
+    );
     this.DisplacementFilter.scale = new PIXI.Point(0, 0);
 
     this.canvas.stage.filters = [this.DisplacementFilter];
@@ -142,54 +137,65 @@ export default class PixiSlider {
     this.HTMLslides[this.active].classList.remove(this.constants.isActive);
     // add active slide title and remove previous
     this.canvas.stage.removeChild(this.canvas.stage.children[2]);
-    this.canvas.stage.addChild(this._createTitle(this.slidesData.titles[this.active]));
+    this.canvas.stage.addChild(
+      this._createTitle(this.slidesData.titles[this.active]),
+    );
 
     if (this.displacement !== undefined) tl.add(this._animate());
 
     if (this.scroll) {
-      tl
-        .fromTo(
-          slides[this.active].position,
-          this.speed,
-          { x: 0 },
-          { x: offset, ease: Power2.easeInOut },
-          `-=${this.speed}`,
-        )
-        .fromTo(
-          slides[newIndex].position,
-          this.speed,
-          { x: -offset },
-          { x: 0, ease: Power2.easeInOut },
-          `-=${this.speed}`,
-        );
+      tl.fromTo(
+        slides[this.active].position,
+        this.speed,
+        { x: 0 },
+        { x: offset, ease: Power2.easeInOut },
+        `-=${this.speed}`,
+      ).fromTo(
+        slides[newIndex].position,
+        this.speed,
+        { x: -offset },
+        { x: 0, ease: Power2.easeInOut },
+        `-=${this.speed}`,
+      );
     } else {
-      tl
-        .fromTo(
-          slides[this.active],
-          this.speed,
-          { alpha: 1 },
-          { alpha: 0, ease: Power2.easeInOut },
-          `-=${this.speed}`,
-        )
-        .fromTo(
-          slides[newIndex],
-          this.speed,
-          { alpha: 0 },
-          { alpha: 1, ease: Power2.easeInOut },
-          `-=${this.speed}`,
-        );
+      tl.fromTo(
+        slides[this.active],
+        this.speed,
+        { alpha: 1 },
+        { alpha: 0, ease: Power2.easeInOut },
+        `-=${this.speed}`,
+      ).fromTo(
+        slides[newIndex],
+        this.speed,
+        { alpha: 0 },
+        { alpha: 1, ease: Power2.easeInOut },
+        `-=${this.speed}`,
+      );
     }
   }
 
   _renderSlide(image, index) {
     const { width, height } = this.size;
+
     const slide = new PIXI.Container();
 
     // eslint-disable-next-line
     const bg = new PIXI.Sprite.from(image);
-    const { scale, pos } = coverSprite({ height, width }, bg);
-    bg.scale = new PIXI.Point(scale, scale);
-    bg.position = new PIXI.Point(pos.x, pos.y);
+
+    bg.anchor.set(0.5);
+    bg.position.x = width / 2;
+    bg.position.y = height / 2;
+
+    const wrapAspect = width / height;
+    const bgAspect = bg.width / bg.height;
+
+    if (wrapAspect > bgAspect) {
+      bg.width = width;
+      bg.height = width / bgAspect;
+    } else {
+      bg.height = height;
+      bg.width = height * bgAspect;
+    }
 
     const mask = createMask(0, 0, width, height);
 
@@ -212,7 +218,6 @@ export default class PixiSlider {
     });
   }
 
-
   _setWindowSize() {
     this.size = {
       width: this.container.offsetWidth,
@@ -227,12 +232,18 @@ export default class PixiSlider {
 
     this.canvas.renderer.resize(width, height);
     this.canvas.stage.removeChildren();
+    _setHTMLSlides.call(this);
     this._render();
   }
 
   _render() {
     this._initSlides();
     this._createFilter();
+  }
+
+  _resize() {
+    this.resizeSlider = debounce(300, this.resize.bind(this));
+    window.addEventListener('resize', this.resizeSlider);
   }
 
   init() {
@@ -243,55 +254,11 @@ export default class PixiSlider {
     _loadPictures.call(this);
     // _initListeners.call(this);
     _handleNav.call(this);
+    this._resize();
 
     return this;
   }
 }
-
-// const slider = document.querySelector('.js-slider');
-// const prev = slider.querySelector('.js-prev');
-// const next = slider.querySelector('.js-next');
-// const nav = slider.querySelector('.js-slider-nav');
-// const title = slider.querySelector('.slider__title');
-
-// const titleStyle = window.getComputedStyle(title);
-
-
-// const mySlider = new PixiSlider({
-//   container: slider,
-//   clearWrap: false,
-//   arrows: {
-//     prev,
-//     next
-//   },
-//   nav,
-//   speed: 1.4,
-//   displacement: {
-//     img: './img/noise-01.png',
-//     scale: {
-//       x: 100,
-//       y: 100
-//     },
-//     offset: {
-//       x: 0,
-//       y: 0
-//     }
-//   },
-//   title: {
-//     style: {
-//       fontFamily: titleStyle.fontFamily,
-//       fontSize: titleStyle.fontSize,
-//       fill: titleStyle.color,
-//       textTransform: titleStyle.textTransform,
-//     }
-//   }
-// });
-
-// const resizeSlider = debounce(200, () => {
-//   mySlider.resize();
-// });
-
-// window.addEventListener('resize', resizeSlider);
 
 const sliders = [...document.querySelectorAll('.js-slider')];
 
@@ -300,11 +267,13 @@ sliders.forEach((slider) => {
   const next = slider.querySelector('.js-next');
   const nav = slider.querySelector('.js-slider-nav');
   const title = slider.querySelector('.slider__title');
+  const container = slider.querySelector('.js-slider-container');
 
   const titleStyle = window.getComputedStyle(title);
 
+
   const mySlider = new PixiSlider({
-    container: slider,
+    container,
     clearWrap: false,
     scroll: true,
     arrows: {
@@ -333,4 +302,12 @@ sliders.forEach((slider) => {
       },
     },
   });
+
+  // const gui = new dat.GUI();
+  // gui.add(mySlider.props, 'clearWrap');
+  // gui.add(mySlider, 'scroll');
+  // gui.add(mySlider.props, 'speed', 1, 10);
+  // gui.add(mySlider.props.displacement, 'img');
+  // gui.add(mySlider.props.displacement.scale, 'x');
+  // gui.add(mySlider.props.displacement.scale, 'y');
 });

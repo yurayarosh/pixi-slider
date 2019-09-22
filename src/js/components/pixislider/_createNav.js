@@ -8,9 +8,12 @@ export default function _createnav() {
   for (let i = 0; i < this.slidesData.images.length; i++) {
     const item = document.createElement('li');
     if (i === 0) {
-      item.innerHTML = `<button class="${this.constants.isActive}" ${this.constants.index}="${i}">${i + 1}</button>`;
+      item.innerHTML = `<button class="${this.constants.isActive}" ${
+        this.constants.index
+      }="${i}">${i + 1}</button>`;
     } else {
-      item.innerHTML = `<button ${this.constants.index}="${i}">${i + 1}</button>`;
+      item.innerHTML = `<button ${this.constants.index}="${i}">${i
+        + 1}</button>`;
     }
 
     list.appendChild(item);

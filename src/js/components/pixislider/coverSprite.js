@@ -1,30 +1,29 @@
-import * as PIXI from 'pixi.js';
+export default function fitCanvasBg(contains) {
+  return (
+    parentWidth,
+    parentHeight,
+    childWidth,
+    childHeight,
+    scale = 1,
+    offsetX = 0.5,
+    offsetY = 0.5
+  ) => {
+    const childRatio = childWidth / childHeight;
+    const parentRatio = parentWidth / parentHeight;
+    let bgWidth = parentWidth * scale;
+    let bgHeight = parentHeight * scale;
 
-export default function coverSprite(bgSize, sprite) {
-  const forceSize = {
-    width: sprite.width,
-    height: sprite.height,
-  };
+    if (contains ? childRatio > parentRatio : childRatio < parentRatio) {
+      bgHeight = bgWidth / childRatio;
+    } else {
+      bgWidth = bgHeight * childRatio;
+    }
 
-  const winratio = bgSize.width / bgSize.height;
-  const spratio = forceSize.width / forceSize.height;
-
-  const pos = new PIXI.Point(0, 0);
-  let scale = 1;
-
-  if (winratio > spratio) {
-    // photo is wider than background
-    scale = bgSize.width / forceSize.width;
-  } else {
-    // photo is taller than background
-    scale = bgSize.height / forceSize.height;
-  }
-
-  pos.x = -((forceSize.width * scale) - bgSize.width) / 2;
-  pos.y = -((forceSize.height * scale) - bgSize.height) / 2;
-
-  return {
-    scale,
-    pos,
+    return {
+      bgWidth,
+      bgHeight,
+      offsetX: (parentWidth - bgWidth) * offsetX,
+      offsetY: (parentHeight - bgHeight) * offsetY
+    };
   };
 }

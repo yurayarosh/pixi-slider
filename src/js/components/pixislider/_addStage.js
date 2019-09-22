@@ -9,10 +9,10 @@ export default function _addStage() {
   });
   this.canvas.renderer.autoResize = true;
 
-  if (this.wrapper.children.length > 0) {
-    this.wrapper.insertBefore(this.canvas.view, this.wrapper.firstChild);
+  if (this.container.children.length > 0) {
+    this.container.insertBefore(this.canvas.view, this.container.firstChild);
   } else {
-    this.wrapper.appendChild(this.canvas.view);
+    this.container.appendChild(this.canvas.view);
   }
 
   this.canvas.view.style.display = 'block';
